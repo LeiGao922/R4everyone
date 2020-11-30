@@ -1,0 +1,1540 @@
+---
+title: "4-17 Basics of R"
+author: "Lei Gao"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: hpstr
+    highlight: github
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(collapse = T,
+                      comment = "",
+                      warning = F,
+                      message = F)
+library(tidyverse)
+theme_set(theme_classic()+theme(legend.position = "top"))
+```
+
+# 4. Basics of R
+
+# 4.3 Data Types
+
+## 4.3.1 数值型
+
+类型其他编程语言的`float`和`double`
+
+```{r}
+class(4L);class(2.8)
+```
+
+## 4.3.2 Character Data
+
+* character
+
+* factor
+
+```{r}
+x <- "data"
+y <- factor("data")
+nchar(x)
+#nchar(y)
+nchar("hello")
+```
+## 4.3.3 Dates
+
+```{r}
+date1 <- as.Date("2020-11-19")
+date1;class(date1)
+```
+
+```{r}
+as.numeric(date1)
+```
+
+```{r}
+date2 <- as.POSIXct("2020-11-19 17:24")
+date2;class(date2)
+```
+
+专门针对Date数据的包，lubridate和chron等。
+
+## 4.3.4 Logical
+
+```{r}
+TRUE*5;FALSE*5
+```
+
+# 4.4 Vectors
+
+vectors don't have  dimension, meaning there is no such thing as a column vector or
+row vector.
+
+## 4.4.1 向量操作
+```{r}
+x <- c(1:10)
+x*3;x+2;x-2;x/4;x^2;sqrt(x)
+```
+检查所有的元素是否符合要求：all()
+
+检查任意元素是否符合要求：any()
+
+```{r}
+x <- 10:1
+y <-  -4:5
+any(x<5);all(x<y)
+
+```
+
+## 4.4.2 factor vectors
+
+```{r}
+q <- c("Hockey", "Football", "Baseball", "Curling", "Rugby",
+       "Lacrosse", "Basketball", "Tennis", "Cricket", "Soccer")
+q2 <- c(q, "Hockey", "Lacrosse", "Hockey", "Water Polo","Hockey", "Lacrosse")
+q2Factor <- as.factor(q2)
+q2Factor
+```
+```{r}
+as.numeric(q2Factor)
+```
+
+```{r}
+factor(x=c("High School", "College", "Masters", "Doctorate"),
+  levels=c("High School", "College", "Masters", "Doctorate"),
+ ordered=TRUE) #有序因子变量
+```
+# 4.6 Function Documentation
+
+apropos来自Latin propositium，含义是：purpose，plan.
+
+```{r}
+apropos("mea") #Find Objects By (Partial) Name
+```
+
+# 5. Advanced Data Structures
+
+# 5.1 数据框
+
+* names(), rownames()
+
+* head(),tail()
+
+* nrow(),ncol(),dim()
+
+* class()
+
+为了保证输出的结果是single-column data.frame, 可在提取数据时，加入参数：drop=FALSE,保证提取的元素组成的仍是数据框。
+
+```{r}
+x <- 10:1
+y <-  -4:5
+q <- c("Hockey", "Football", "Baseball", "Curling", "Rugby",
+       "Lacrosse", "Basketball", "Tennis", "Cricket", "Soccer")
+theDF <- data.frame(x,y,q)
+class(theDF[,"q"]);class(theDF[,1]);class(theDF["q"]);class(theDF[,"q",drop=FALSE])
+```
+
+## 5.2 Lists
+
+像data.frames一样，lists也是有names的。
+
+```{r}
+list5 <- list(theDF,1:10)
+names(list5);names(list5) <- c("data.frame","vector")
+```
+
+取list中的单个元素时，用[[]]（双括号）
+
+```{r}
+list5[[1]]
+```
+查看list的维度：length(list)
+
+```{r}
+length(list5)
+```
+
+# 6. Reading Data into R
+
+推荐函数：
+
+* read.table()
+
+* readr::read_delim()
+
+* data.table::fread()
+
+## 6.2 Excel 数据
+
+readxl→轻松读取*.xls和*.xlsx文件
+
+readxl::read_excel(file,sheet=" ")→读取excel文件，并选取要读取的sheet
+
+
+# 7.统计绘图
+
+## 7.1 基础绘图
+
+```{r}
+rm(list = ls())
+library(ggplot2)
+data("diamonds")
+head(diamonds,n=3)
+```
+
+```{r}
+hist(diamonds$carat,main = "Carat Histogram",xlab = "Carat")
+```
+
+```{r}
+plot(price~carat,data = diamonds) #y~x格式
+```
+
+```{r}
+plot(diamonds$carat,diamonds$price)
+```
+
+```{r}
+boxplot(diamonds$carat)
+```
+
+## 7.2 ggplot2
+
+geome_line()设置参数，aes(group=1)
+
+# 8.Writing R functions
+
+## 8.1 Hello, World!
+
+```{r}
+say.hello <- function(){
+  print("Hello, World!")
+}
+say.hello
+```
+
+## 8.2 Function arguments
+
+sprintf():进行字符串的迭代，全称string print function, 来自于C语言。
+
+```{r}
+#单个迭代
+sprintf("Hello %s!","Richard")
+```
+
+
+```{r}
+#多个迭代
+sprintf("Hello %s, today is %s!","Richard","Saturday")
+```
+
+```{r}
+#建立函数
+hello.person <- function(name){
+  sprintf("Hello %s!",name)
+}
+hello.person("Richard")
+```
+```{r}
+#多个参数
+hello.person <- function(first,second){
+  sprintf("Hello %s and %s!",first,second)
+}
+hello.person("Richard","Brain")
+```
+
+### 8.2.1 Default argument (缺省值)
+
+```{r}
+hello.person <- function(first,last="Dove"){
+  sprintf("Hello %s and %s",first,last)
+}
+hello.person("Richard");hello.person("Richard","Brain")
+```
+
+### 8.2.2 Extra argument
+
+```{r}
+hello.person <- function(first,last="Dove",...){
+  sprintf("Hello %s and %s",first,last)
+}
+hello.person("Richard",extra="Goodbye")
+```
+
+## 8.3 Return values
+
+```{r}
+# 隐式返回
+double.number <- function(x){
+  x^2
+}
+double.number(10)
+```
+
+```{r}
+# 显式返回
+double.number <- function(x){
+  return(x^2)
+}
+double.number(10)
+```
+
+## 8.4 do.call
+
+```{r}
+run.this <- function(x,func=mean){
+  do.call(func,args = list(x))
+}
+run.this(1:10)
+```
+
+```{r}
+#修改默认参数
+run.this(1:10,sd)
+```
+
+# 9.控制语句
+
+## 9.1 if&else
+* if: If something is TURE, then perform some action; otherwise, don not perform that action.
+
+```{r}
+toCheck=1
+check.box <- function(toCheck){
+  if(toCheck==1){
+    print("Hello!")
+  }else{
+    print("Goodbye!")
+  }
+}
+
+check.box(0);check.box(TRUE)
+```
+
+```{r}
+#else if 
+check.bool <- function(x){
+  if(x==0){
+    print("Hello!")
+  }else if (x==1){
+    print("Goodbye!")
+  } else{
+    print("Confused!")
+  }
+}
+check.bool(3)
+```
+
+## 9.2 switch
+
+```{r}
+use.switch <- function(x){
+  switch(x,
+    "a"="first",
+    "b"="second",
+    "c"="third",
+    "d"="fourth",
+    "other"
+  )
+}
+use.switch("a")
+```
+
+## 9.3 ifelse
+
+```{r}
+ifelse(1==0,"Yes","NO")
+```
+
+```{r}
+totest <- c(1,2,3,1,2)
+ifelse(totest==1,"Yes","NO")
+```
+
+```{r}
+ifelse(totest==1,totest*3,totest)
+```
+
+## 9.4 Compound Tests
+
+* && 和|| 用于if，仅test第一个
+
+* & 和 | 检测所有
+
+```{r}
+a <- c(1,1,0,1)
+b <- c(2,1,0,1)
+ifelse(a==1&b==1,"Yes","No");ifelse(a==1&&b==1,"Yes","No")
+```
+
+# 10. loop(循环)
+
+## 10.1 for
+
+```{r}
+fruit <- c("apple", "banana", "pomegranate")
+fruitLength <- rep(NA,length(fruit))
+names(fruitLength) <- fruit
+for (a in fruit){
+  fruitLength[a]=nchar(a)
+}
+fruitLength
+```
+
+## 10.2 while
+
+```{r}
+x=1
+while(x<=5){
+  print(x)
+  x=x+1
+}
+```
+
+## 10.3 next&break
+
+```{r}
+# next
+for (i in 1:10){
+  if (i==3) 
+  {next}
+  print(i)
+  }
+```
+
+```{r}
+#break
+for (i in 1:10){
+  if(i==4){
+    break
+  }
+  print(i)
+}
+```
+Notes: As stated earlier, if a solution can be done without loops, via vectorization or matrix algebra, then avoid the loop. It is particularly important to avoid nested loops. Loops inside other loops are extremely slow in R.
+
+# 11.Group manipulation
+
+在数据分析中，manipulating the data占据80%的时间。整个过程：split-apply-combine
+
+## 11.1 apply家族
+
+### 11.1.1 apply
+
+
+```{r}
+theMatrix <- matrix(1:9,nrow = 3)
+theMatrix
+```
+
+```{r}
+# sum the rows
+apply(theMatrix,1,sum)
+```
+```{r}
+# sum the columns
+apply(theMatrix, 2, sum)
+```
+
+当然在baseR中有rowSums和colSums与之对应。
+
+```{r}
+rowSums(theMatrix);colSums(theMatrix)
+```
+
+当有NA存在时，the result of sum will be NA.
+
+```{r}
+theMatrix[2,1] <- NA
+apply(theMatrix, 1, sum)
+```
+
+```{r}
+#na.rm=TRUE 去除NA
+apply(theMatrix,1,sum,na.rm=T)
+```
+
+### 11.1.2 lapply和mapply
+
+```{r}
+# lapply对list中的每一个元素应用function
+theList <- list(A=matrix(1:9,3),B=1:5,C=matrix(1:4,2),D=2)
+lapply(theList, sum)
+```
+
+```{r}
+# sapply:对list的每一个元素应用后，返回结果为vector.
+sapply(theList, sum)
+```
+
+```{r}
+theNames <- c("Jared","Deb","Paul")
+lapply(theNames, nchar)
+```
+
+### 11.1.3 mapply
+
+```{r}
+#随机生存两个list
+firstList <- list(A=matrix(1:16,4),B=matrix(1:16,2),C=1:5)
+secondList <- list(A=matrix(1:16,4),B=matrix(1:16,8),C=15:1)
+mapply(identical,firstList,secondList) #判断连个list的每个元素是否相同
+```
+
+```{r}
+# build simply function
+simpleFunc <- function(x,y){
+  NROW(x)+NROW(y)
+}
+mapply(simpleFunc, firstList,secondList)
+```
+## 11.2 aggregate
+
+```{r}
+data("diamonds")
+head(diamonds,3)
+```
+
+```{r}
+aggregate(price~cut,diamonds,mean) #按照cut计算price的平均值
+```
+
+```{r}
+aggregate(price~cut+color,diamonds,mean) #按照cut,color计算price的平均值
+```
+```{r}
+aggregate(cbind(price,carat)~cut,diamonds,mean) # 双y值
+```
+
+```{r}
+aggregate(cbind(price,carat)~cut+color,diamonds,mean) #双y值，x值
+```
+
+```{r}
+# 同时计算mean和median
+library(plyr)
+aggregate(price~cut,diamonds,each(mean,median))
+```
+
+## 11.4 data.table
+
+```{r}
+library(data.table)
+theDF <- data.frame(A=1:10,
+                    B=letters[1:10],
+                    C=LETTERS[11:20],
+                    D=rep(c("One", "Two", "Three"), length.out=10))
+theDT <- data.table(A=1:10,
+                    B=letters[1:10],
+                    C=LETTERS[11:20],
+                    D=rep(c("One", "Two", "Three"), length.out=10))
+theDF;theDT
+```
+
+```{r}
+class(theDF$B);class(theDT$B)
+```
+
+```{r}
+diamondsDT <- data.table(diamonds)
+diamondsDT
+```
+
+```{r}
+theDT[,"B",with=FALSE];theDT[,c("A","C"),with=FALSE]
+```
+
+### 11.4.1 Keys键值
+
+Keys键值，就是行名
+
+```{r}
+tables() #show tables
+```
+```{r}
+setkey(theDT,D)
+theDT
+```
+
+```{r}
+key(theDT);tables()
+```
+
+根据Keys键值选取数据
+
+```{r}
+theDT["One",]
+```
+
+```{r}
+# 多个columns可被设置为key
+setkey(diamondsDT,cut,color)
+```
+
+
+```{r}
+# 一次性取多个行
+diamondsDT[J("Ideal","E"),]
+```
+
+
+```{r}
+diamondsDT[J("Ideal",c("E","D")),]
+```
+
+### 11.4.2 data.table aggregation
+
+```{r}
+aggregate(price~cut,diamonds,mean)
+```
+
+
+```{r}
+# 在data.table可得到相同的结果
+
+diamondsDT[,mean(price),by=cut]
+```
+
+```{r}
+# aggregate 和 data.table唯一不同的是名称不同
+
+diamondsDT[,list(price=mean(price)),by=cut]
+```
+
+
+```{r}
+# 多个分组变量时，用list()
+diamondsDT[,mean(price),by=list(cut,color)]
+```
+
+
+```{r}
+diamondsDT[,list(price=mean(price),carat=mean(carat)),by=cut]
+```
+
+# 12. dplyr
+
+ Hadley Wickham 基于plyr包，开发了一系列的R包，其中dplyr主要针对data.frames, 而purrr主要针对list和vector，相比之下plyr有逐渐被替代的趋势。
+ 
+## 12.1 Pipes 管道符
+
+```{r}
+library(magrittr)
+data(diamonds)
+dim(head(diamonds,n=4))
+```
+
+
+```{r}
+diamonds %>% 
+  head(4) %>% 
+  dim
+```
+
+
+## 12.2 tbl
+
+```{r}
+class(diamonds);head(diamonds)
+```
+
+## 12.3 select
+
+```{r}
+# 选择列
+select(diamonds,carat,price)
+```
+
+```{r}
+# 等价于
+diamonds %>% 
+  select(carat,price)
+```
+
+
+```{r}
+# one_of()
+
+diamonds %>% 
+  select(one_of("carat","price"))
+```
+
+
+```{r}
+diamonds[,c('carat','price')] #传统方法提取列
+```
+
+
+```{r}
+# starts_with,ends_with,contains
+diamonds %>% 
+  select(starts_with("c")) #提取以“c”开头的列
+```
+
+
+```{r}
+diamonds %>% 
+  select(ends_with("e")) #提取以“e”结尾的列
+```
+
+
+```{r}
+diamonds %>% 
+  select(contains("l")) #提取包含l的列
+```
+
+
+```{r}
+#  matches 正则表达式
+diamonds %>% 
+  select(matches('r.+t')) # 与r.+t匹配的列
+```
+
+
+```{r}
+# by name
+
+diamonds %>% 
+  select(-carat, -price) #去除carat和price
+```
+
+
+```{r}
+# 等价于 
+diamonds %>% 
+  select(-c(carat,price))
+```
+
+
+```{r}
+# by number
+diamonds %>% 
+  select(-1,-7)
+```
+
+
+```{r}
+diamonds %>% 
+  select(-c(1,7))
+```
+
+
+## 12.4 filter
+
+```{r}
+diamonds %>% 
+  filter(cut=="Ideal")
+```
+
+
+```{r}
+diamonds %>% 
+  filter(cut %in% c("Ideal","Good"))
+```
+
+
+```{r}
+diamonds %>% 
+  filter(price>=1000)
+```
+
+```{r}
+diamonds %>% 
+  filter(carat>2&price<14000)
+```
+
+
+```{r}
+diamonds %>% 
+  filter(carat<1|carat>5)
+```
+
+
+## 12.5 slice
+
+slice主要是根据逻辑值和行号，选取行。
+
+```{r}
+diamonds %>% 
+  slice(1:5)
+```
+
+
+```{r}
+diamonds %>% 
+  slice(c(1:5,8,15:20))
+```
+
+
+```{r}
+diamonds %>% 
+  slice(-1) #去掉第1行
+```
+
+## 12.6 mutate
+
+```{r}
+diamonds %>% 
+  select(carat,price) %>% 
+  mutate(Ratio=price/carat,Double=Ratio*2)
+```
+
+ * %<>% 管道符
+ 
+```{r}
+library(magrittr)
+diamonds2 <- diamonds
+diamonds2
+```
+ 
+
+```{r}
+diamonds2 %<>%
+  select(carat,price) %>% 
+  mutate(Ratio=price/carat,Double=Ratio*2)
+head(diamonds2,2)
+```
+
+
+```{r}
+diamonds2 <- diamonds2 %>% 
+  mutate(Quadruple=Double*2)
+head(diamonds2,4)
+```
+
+## 12.7 summarize
+
+```{r}
+summarize(diamonds,mean(price))
+```
+
+
+## 12.8 group_by
+
+```{r}
+library(dplyr)
+diamonds %>% 
+  group_by(cut) %>% 
+  dplyr::summarize(AvgPrice=mean(price))
+```
+
+
+## 12.9 arrange
+
+```{r}
+diamonds %>% 
+  group_by(cut) %>% 
+  dplyr::summarize(AvgPrice=mean(price),SumCarat=sum(carat)) %>% 
+  arrange(AvgPrice)
+```
+
+
+## 12.10 do
+
+```{r}
+topN <- function(x,N=5){
+  x %>% arrange(desc(price)) %>% head(N)
+}
+topByCut <- diamonds %>% 
+  group_by(cut) %>% 
+  do(Top=topN(.,N=3))
+class(topByCut)
+```
+
+
+## 12.11 dplyr with Databases
+
+# 13.purrr包-迭代
+
+purrr 有多重含义，purrr指能够强制执行纯程序，也是猫叫(cat purring)的拟声词，同时有5个字母，和dplyr,readr,tidyr相一致。
+
+purrr包的核心函数:`map()`, 对list的每个元素应用function, 与`lapply`的功能类似。
+
+参考：https://bookdown.org/wangminjie/R4DS/purrr.html
+
+## 13.1 map 
+
+```{r}
+theList <- list(A=matrix(1:9,3),
+                B=1:5,
+                C=matrix(1:4,2),
+                D=2)
+lapply(theList,sum)
+```
+
+
+```{r}
+# map()
+library(purrr)
+theList %>% 
+  map(sum)
+```
+
+
+lapply 和 map的结果是一致的
+
+```{r}
+identical(lapply(theList, sum),theList %>% map(sum))
+```
+
+当有NA存在时
+
+```{r}
+theList2 <- theList
+theList2[[1]][2,1] <- NA
+theList2[[2]][4] <- NA
+
+theList2 %>% 
+  map(sum)
+```
+
+解决方案一：匿名函数
+
+```{r}
+theList2 %>% 
+  map(function(x)sum(x,na.rm=TRUE))
+```
+
+
+解决方案二：传递na.rm=TRUE到map(,...)
+
+```{r}
+theList2 %>% 
+  map(sum,na.rm=T)
+```
+
+## 13.2 map_*
+
+### 13.2.1 map_int
+
+返回结果格式是integer
+
+```{r}
+theList %>% 
+  map_int(NROW)
+```
+
+
+### 13.2.2 map_dbl
+
+返回结果是numeric数值型
+
+```{r}
+theList %>% 
+  map_dbl(mean)
+```
+
+### 13.2.3 map_chr
+
+```{r}
+# theList %>% 
+#   map_chr(class)
+```
+
+
+```{r}
+theList3 <- theList
+theList3[['E']] <- factor(c("A","B","C"),ordered = T)
+class(theList3$E)
+```
+
+
+```{r}
+theList3 %>% 
+  map(class)
+```
+
+
+### 13.2.4 map_lgl
+
+```{r}
+theList %>% 
+  map_lgl(function(x)NROW(x)<3)
+```
+
+### 13.2.5 map_df
+
+```{r}
+buildDF <- function(x){
+  data.frame(A=1:x,B=x:1)
+}
+listOfLengths <- list(3,4,1,5)
+
+listOfLengths %>% 
+  map(buildDF)
+```
+
+
+```{r}
+listOfLengths %>% 
+  map_df(buildDF) #转为data.frames
+
+```
+
+
+### 13.2.6 map_if
+
+```{r}
+theList %>% 
+  map_if(is.matrix,~.x*2)
+```
+
+### 13.3 迭代数据框
+
+```{r}
+data("diamonds")
+diamonds %>% 
+  map_dbl(mean)
+```
+
+可发现map_dbl()只对数据值型计算mean，作用类似mutate_each()
+
+```{r}
+library(dplyr)
+diamonds %>% 
+  summarise_each(funs(mean))
+```
+
+### 13.4 map处理多个输入
+
+`mapply`可以处理两个lists。`purrr::map2()` as a special case when the function takes exactly two arguments.作用类似`pmap()`.
+
+```{r}
+firstList <- list(A=matrix(1:16, 4), B=matrix(1:16, 2), C=1:5)
+secondList <- list(A=matrix(1:16, 4), B=matrix(1:16, 8), C=15:1)
+
+simpleFunc <- function(x,y){
+  NROW(x)+NROW(y)
+}
+map2(firstList,secondList,simpleFunc)
+```
+
+
+```{r}
+map2_int(firstList,secondList,simpleFunc)
+```
+
+
+```{r}
+pmap(list(firstList,secondList),simpleFunc)
+``` 
+
+
+```{r}
+pmap_int(list(firstList,secondList),simpleFunc)
+```
+
+总结：
+
+核心函数：
+
+* map()→lapply()
+
+* map2()→ mapply()和pmap()，应用于两个list
+
+* pmap()→应用于3个list
+
+# 14. Data Reshaping
+
+本章主要讨论plyr，reshape2和data.table，下一章单独讨论tidyverse。
+
+## 14.1 cbind和rbind
+
+```{r}
+sport <- c("Hockey", "Baseball", "Football")
+league <- c("NHL", "MLB", "NFL")
+trophy <- c("Stanley Cup", "Commissioner's Trophy",
+            "Vince Lombardi Trophy")
+trophies1 <- cbind(sport,league,trophy)
+
+trophies2 <- data.frame(sport = c("Hockey", "Baseball", "Football"),
+                        league = c("NHL", "MLB", "NFL"),
+                        trophy = c("Stanley Cup", "Commissioner's Trophy",
+                                    "Vince Lombardi Trophy"))
+trophies <- rbind(trophies1,trophies2)
+
+cbind(Sport=sport,Association=league,Prize=trophy)
+```
+
+
+## 14.2 Joins
+
+```{r}
+rm(list = ls())
+download.file(url="http://jaredlander.com/data/US_Foreign_Aid.zip",
+              destfile="data/ForeignAid.zip")
+unzip("data/ForeignAid.zip",exdir = "data")
+
+library(stringr)
+theFiles <- dir("data/",pattern = "\\.csv")
+for (a in theFiles){
+  nameToUse=str_sub(string = a,12,18)
+  temp=read.table(file = file.path("data",a),
+                  header = T,sep = ",",stringsAsFactors = F)
+  assign(x=nameToUse,value = temp)
+}
+
+```
+
+
+### 14.2.1 merge
+
+```{r}
+Aid90s00s <- merge(x=Aid_90s,y=Aid_00s,
+                   by.x=c("Country.Name", "Program.Name"),
+                   by.y=c("Country.Name", "Program.Name"))
+```
+
+
+### 14.2.2 plyr::join
+
+```{r}
+library(plyr)
+Aid90s00sJoin <- join(x=Aid_90s,y=Aid_00s,
+                   by=c("Country.Name", "Program.Name"))
+head(Aid90s00sJoin,3)
+```
+
+怎么合并8个data.frames？
+
+最好的方法，先把所有的data.frames放进一个list，然后用Reduce合并。
+
+```{r}
+frameNames <- str_sub(theFiles,12,18)
+frameList <- vector("list",length(frameNames)) #生成长度为8的list
+names(frameList) <- frameNames
+
+for (a in frameNames){
+  frameList[[a]]=eval(parse(text = a))
+}
+```
+
+
+```{r}
+allAid <- Reduce(function(...){
+  join(...,by = c("Country.Name", "Program.Name"))
+},frameList)
+
+dim(allAid)
+```
+
+
+useful::corner(allAid,c=15) 展示15列数据
+
+useful::corner(allAid,corner="topright") 展示右上角数据
+
+```{r}
+library(useful)
+corner(allAid,c=15)
+```
+
+
+```{r}
+bottomleft(allAid,c=15)
+```
+
+## 14.3 reshape2
+
+### 14.3.1 melt
+
+```{r}
+head(Aid_00s,3)
+```
+
+
+```{r}
+library(reshape2)
+melt00 <- melt(Aid_00s,id.vars = c("Country.Name", "Program.Name"),
+               variable.name = "Year",value.name = "Dollars")
+tail(melt00,5)
+```
+
+
+```{r}
+library(scales)
+melt00$Year <- as.numeric(str_sub(melt00$Year,3,6))
+meltAgg <- aggregate(Dollars~Program.Name+Year,data = melt00,
+                     sum,na.rm=T)
+meltAgg$Program.Name <- str_sub(meltAgg$Program.Name,1,10)
+meltAgg %>% 
+  ggplot(aes(Year,Dollars))+
+  geom_line(aes(group=Program.Name))+
+  facet_wrap(~Program.Name)+
+  scale_x_continuous(breaks=seq(from=2000, to=2009, by=2))+
+  theme(axis.text.x=element_text(angle=90, vjust=1, hjust=0))+
+  scale_y_continuous(labels = multiple_format(extra=dollar,multiple="B"))
+```
+
+### 14.3.2 dcast
+
+```{r}
+cast00 <- dcast(melt00,Country.Name + Program.Name ~ Year,
+                value.var = "Dollars")
+head(cast00,3)
+```
+
+
+# 15. Reshaping Data+Tidyverse
+
+## 15.1 合并行和列
+
+* bind_rows
+
+* bind_cols
+
+优点：对data.frames(and tibbles)非常好。
+
+缺点：不能用于vectors和matrices
+
+```{r}
+library(dplyr)
+library(tibble)
+
+sportLeague <- tibble(sport=c("Hockey", "Baseball", "Football"),
+                      league=c("NHL", "MLB", "NFL"))
+trophy <- tibble(trophy=c("Stanley Cup", "Commissioner's Trophy",
+                          "Vince Lombardi Trophy"))
+
+trophies1 <- bind_cols(sportLeague,trophy)
+trophies2 <- tribble(
+  ~sport, ~league, ~trophy,
+  "Basketball", "NBA", "Larry O'Brien Championship Trophy",
+  "Golf", "PGA", "Wanamaker Trophy"
+)
+
+trophies <- bind_rows(trophies1,trophies2)
+
+trophies
+```
+
+
+## 15.2 Joins with dplyr
+
+
+```{r}
+library(readr)
+colorsURL <- 'http://www.jaredlander.com/data/DiamondColors.csv'
+diamondColors <- read_csv(colorsURL)
+diamondColors
+```
+
+
+```{r}
+data("diamonds")
+unique(diamonds$color)
+```
+
+
+```{r}
+library(dplyr)
+left_join(diamonds,diamondColors,by=c("color"="Color"))
+```
+
+
+```{r}
+left_join(diamonds,diamondColors,by=c("color"="Color")) %>% 
+  select(carat,color,price,Description,Details)
+```
+
+
+```{r}
+left_join(diamonds,diamondColors,by=c("color"="Color")) %>% 
+  distinct(color,Description)
+```
+
+
+```{r}
+all.equal(left_join(diamonds,diamondColors,by=c("color"="Color")),
+          inner_join(diamonds,diamondColors,by=c("color"="Color")))
+```
+
+
+```{r}
+semi_join(diamondColors,diamonds,by=c("Color"="color"))
+```
+
+
+```{r}
+anti_join(diamondColors, diamonds, by=c('Color'='color'))
+```
+
+## 15.3 pivot_longer & pivot_wider
+
+
+# 16.字符串操作
+
+## 16.1 paste
+
+```{r}
+paste("Hello", "Jared", "and others")
+```
+
+paste(..., sep = " ", collapse = NULL, recycle0 = FALSE)
+
+可以看出paste有3个参数，sep，collapse
+
+```{r}
+paste("Hello", "Jared", "and others",sep = "/")
+
+```
+
+像其他函数一样，paste是向量化的。这意味着每一个元素都是一个vector,并被放在一起。
+
+```{r}
+paste(c("Hello", "Hey", "Howdy"), c("Jared", "Bob", "David"))
+```
+
+
+```{r}
+paste("Hello",c("Jared", "Bob", "David"))
+```
+
+
+```{r}
+vectorOfText <- c("Hello", "Everyone", "out there", ".")
+paste(vectorOfText,collapse = " ")
+```
+
+## 16.2 sprintf
+
+```{r}
+person <- "Jared"
+partySize <- "eight"
+waitTime <- 25
+
+paste("Hello ", person, ", your party of ", partySize,
+      " will be seated in ", waitTime, " minutes.", sep="")
+```
+
+
+```{r}
+sprintf("Hello %s, your party of %s will be seated in %s minutes",
+        person,partySize,waitTime)
+```
+
+
+```{r}
+sprintf("Hello %s, your party of %s will be seated in %s minutes",
+        c("Jared", "Bob"), c("eight", 16, "four", 10), waitTime)
+```
+
+
+## 16.3 提取文本
+
+核心函数：
+
+* str_split()
+
+* str_sub()
+
+* str_detect(string,pattern)
+
+* str_trim() 去掉text周围的spaces
+
+* str_extract(string,pattern)
+
+* str_replace(string,pattern,replacement)
+
+* str_replace_all()
+
+* `\\d`是`[0-9]`的简写形式
+
+* .+?→出现一次或多次，但不是贪婪匹配
+
+```{r}
+# head(str_extract(theStart,pattern = "^\\d{4}"),30) #提取开头的4个数字
+# head(str_extract(theStart,pattern = "\\d{4}$"),30)#提取结尾的4个数字
+# head(str_extract(theStart,pattern = "^\\d{4}$"),30)
+```
+
+# 17.概率分布
+
+# 17.1 正态分布
+
+最常见的分布类型，正态分布，又叫Gaussian分布。
+
+核心函数：
+
+* rnorm
+
+* dnorm
+
+* pnorm
+
+```{r}
+rnorm(n=10,mean = 100,sd=20) #默认生成mean=0，sd=1的数
+```
+
+dnrom: The density(the probability of a particular value) for the normal distribution is usingdnorm. 正态分布特定值的计算,but this is an estimate of the probability.
+
+```{r}
+randNorm10 <- rnorm(10)
+dnorm(randNorm10)
+```
+
+
+```{r}
+dnorm(c(-1,0,1))
+```
+
+
+```{r}
+randNorm <- rnorm(30000)
+randDensity <- dnorm(randNorm)
+library(ggplot2)
+ggplot(data.frame(x=randNorm,y=randDensity),aes(x,y))+
+  geom_point()+
+  labs(x="Random Normal Variables",y="Density")
+```
+
+类似的，pnorm()计算的是the cumulative probability that a given number.即累计频率
+
+```{r}
+pnorm(randNorm10)
+```
+
+
+```{r}
+pnorm(c(-3,0,3))
+```
+
+
+默认情况下只是left-tailed. 如果想要计算中间的值，则需要差值,即曲线下面积。
+
+```{r}
+pnorm(1)-pnorm(0)
+```
+
+
+```{r}
+pnorm(1)-pnorm(-1)
+```
+
+
+```{r}
+p <- ggplot(data.frame(x=randNorm,y=randDensity),aes(x,y))+
+  geom_point()+labs(x="x",y="Density")
+
+neg1Seq <- seq(from=min(randNorm),to=-1,by=.1) #生成最小值到-1之间的数
+lessThanNeg1 <- data.frame(x=neg1Seq,y=dnorm(neg1Seq))
+
+lessThanNeg1 <- rbind(c(min(randNorm),0),
+                      lessThanNeg1,
+                      c(max(lessThanNeg1$x),0)) #加上左侧起点和右侧终点
+
+p+geom_polygon(data = lessThanNeg1,aes(x,y))
+
+```
+
+
+```{r}
+neg1Pos1Seq <- seq(-1,1,by=.1)
+neg1To1 <- data.frame(x=neg1Pos1Seq,y=dnorm(neg1Pos1Seq))
+neg1To1 <- rbind(c(min(neg1To1),0),
+                 neg1To1,
+                 c(max(neg1To1),0))
+p+geom_polygon(data=neg1To1,aes(x,y))
+```
+
+
+```{r}
+randProb <- pnorm(randNorm)
+ggplot(data.frame(x=randNorm,y=randProb),aes(x,y))+
+  geom_point()+
+  labs(x="Random Normal Variables", y="Probability")
+```
+
+The opposite of pnorm is qnorm. Given a cumulative probability it returns the quantile.
+
+```{r}
+head(randNorm10,3)
+all.equal(randNorm10,qnorm(pnorm(randNorm10)))
+```
+
+
+## 17.2 二项分布
+
+核心函数： rbinom(n,size,prob) 
+
+* prob→发生某个事件（success）的概率
+
+```{r}
+rbinom(n=5,size = 10,prob = .4)
+```
+
+当size=1时，直接从Bernoulli random variable中选取数据，仅有1(success)和0(failure).
+
+```{r}
+rbinom(n=10,size=1,prob = 0.4)
+```
+
+
+```{r}
+binomData <- data.frame(Successes=rbinom(n=10000,size = 10,prob = .3))
+ggplot(binomData,aes(x=Successes))+
+  geom_histogram(binwidth = 1)
+```
+
+
+```{r}
+binom5 <- data.frame(Successes=rbinom(n=10000,size = 5,prob = .3),Size=5)
+dim(binom5);head(binom5)
+```
+
+
+```{r}
+binom10 <- data.frame(Successes=rbinom(n=10000, size=10, prob=.3), Size=10)
+binom100 <- data.frame(Successes=rbinom(n=10000, size=100, prob=.3), Size=100)
+binom1000 <- data.frame(Successes=rbinom(n=10000, size=1000, prob=.3), Size=1000)
+binomAll <- rbind(binom5,binom10,binom100,binom1000)
+dim(binomAll)
+```
+
+
+```{r}
+ggplot(binomAll,aes(x=Successes))+
+  geom_histogram()+
+  facet_wrap(~Size,scales = "free")
+```
+
+
+## 17.3 Poission 分布
+
+
+```{r}
+pois1 <- rpois(n=10000,lambda = 1)
+pois2 <- rpois(n=10000, lambda=2)
+pois5 <- rpois(n=10000, lambda=5)
+pois10 <- rpois(n=10000, lambda=10)
+pois20 <- rpois(n=10000, lambda=20)
+pois <- data.frame(Lambda.1=pois1, Lambda.2=pois2,
+                   Lambda.5=pois5, Lambda.10=pois10,Lambda.20=pois20)
+library(reshape2)
+pois <- melt(pois,variable.name = "Lambda",value.name = "x")
+pois$Lambda <- as.factor(as.numeric(str_extract(string = pois$Lambda,
+                                                pattern = "\\d+")))
+head(pois)
+```
+
+
+```{r}
+ggplot(pois,aes(x=x))+
+  geom_histogram(binwidth = 1)+
+  facet_wrap(~Lambda)+
+  ggtitle("Probability Mass Function")
+```
+
+
+```{r}
+ggplot(pois,aes(x=x))+
+  geom_density(aes(group=Lambda,color=Lambda,fill=Lambda),adjust=4,alpha=1/2)+
+  scale_color_discrete()+
+  scale_fill_discrete()+
+  ggtitle("Probability Mass Function")
+```
+
+
